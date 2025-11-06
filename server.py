@@ -1,27 +1,32 @@
 import requests
 import json
-from flask import Flask
+from flask import Flask, request, render_template
 from EmotionDetection.emotion_detection import emotion_detector
 
 app = Flask("Emotion Detector")
 
 @app.route('/emotionDetector')
 def sent_analyzer():
-    text_to_analyse = request.arg.get("textToAnalyze")
-    
+    text_to_analyse = request.args.get("textToAnalyze")
+
     result = emotion_detector(text_to_analyse)
+    
     anger = result.get('anger', 0.0)
     disgust = result.get('disgust', 0.0)
     fear = result.get('fear', 0.0)
     joy = result.get('joy', 0.0)
     sadness = result.get('sadness', 0.0)
-    dominant = result.get('dominant_emotion', 'joy')
+    dominant = result.get('dominant_emotion')
 
-    resp_text = (
-        f"For the given statement, the system response is 'anger': {anger}, "
-        f"'disgust': {disgust}, 'fear': {fear}, 'joy': {joy} and 'sadness': {sadness}. "
-        f"The dominant emotion is {dominant}."
-    )
+    if not dominant:
+        return "Invalid text! Please try again!"
+    else:
+        resp_text = (
+                f"For the given statement, the system response is 'anger': {anger}, "
+                f"'disgust': {disgust}, 'fear': {fear}, 'joy': {joy} and 'sadness': {sadness}. "
+                f"The dominant emotion is {dominant}."
+            )
+        return resp_text
 
 @app.route('/')
 def render_index_page():
